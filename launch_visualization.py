@@ -9,7 +9,7 @@ import seaborn as sns
 
 
 # Load the data using pandas
-data = pd.read_csv('./historical_automobile_sales.csv')
+data = pd.read_csv('data/historical_automobile_sales.csv')
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -64,3 +64,18 @@ def update_input_container(selected_statistics):
 
 
 def update_output_container(report_type,input_year):
+   if report_type == 'Recession Period Statistics':
+        # Filter the data for recession periods
+        recession_data = data[data['Recession'] == 1]
+        
+
+
+#Plot 1 Automobile sales fluctuate over Recession Period (year wise)
+        # use groupby to create relevant data for plotting
+        yearly_rec=recession_data.groupby('Year')['Automobile_Sales'].mean().reset_index()
+        R_chart1 = dcc.Graph(
+            figure=px.line(yearly_rec, 
+                x='Year',
+                y='Automobile_Sales',
+                title="Average Automobile Sales fluctuation over Recession Period"))
+   
