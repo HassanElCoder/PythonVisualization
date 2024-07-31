@@ -19,7 +19,7 @@ year_list = [i for i in range(1980, 2024, 1)]
 
 # Create the layout of the app
 app.layout = html.Div([
-    #TASK 2.1 Add title to the dashboard
+   
     html.H1("Automobile Sales Statistics Dashboard",style={'textAlign': 'center', 'color': '#503D36','font-size': 24}),
     html.Div([
         html.Label("Select Statistics:"),
@@ -40,8 +40,19 @@ app.layout = html.Div([
             placeholder='Select-year',
             style = {'width' : '80%', 'padding' : '3px',  'font-size': '20px', 'text-align-last' : 'center'}
         )]),
-    html.Div([#TASK 2.3: Add a division for output display
+    html.Div([
     html.Div(id='output-container')])
     
     ])
+# Define the callback function to update the input container based on the selected statistics
+@app.callback(
+    Output(component_id='select-year', component_property='disabled'),
+    Input(component_id='dropdown-statistics',component_property='value'))
+
+def update_input_container(selected_statistics):
+    if selected_statistics =='Yearly Statistics': 
+        return False
+    else: 
+        return True
+
 
