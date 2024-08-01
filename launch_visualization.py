@@ -73,30 +73,21 @@ def update_output_container(report_type,input_year):
 #Plot 1 Automobile sales fluctuate over Recession Period (year wise)
         # use groupby to create relevant data for plotting
         yearly_rec=recession_data.groupby('Year')['Automobile_Sales'].mean().reset_index()
-        R_chart1 = dcc.Graph(
-               figure=px.line(yearly_rec, 
-                x='Year',
-                y='Automobile_Sales',
-                markers=True,
-                title="Average Automobile Sales fluctuation over Recession Period"))
+        fig=px.line(yearly_rec, x='Year', y='Automobile_Sales',markers=True,title="Average Automobile Sales fluctuation over Recession Period")
+        fig.update_traces(marker=dict(color='LightSkyBlue',size=8))
+        R_chart1 = dcc.Graph(figure=fig)
 #Plot 2 Calculate the average number of vehicles sold by vehicle type       
         
         # use groupby to create relevant data for plotting
         #Hint:Use Vehicle_Type and Automobile_Sales columns
-        recession_sales= recession_data[["Year","Month","Automobile_Sales","Vehicle_Type"]]
-        by_year_month=recession_sales.groupby(['Year','Month'])['Automobile_Sales'].mean()
-        year_col =[item[0] for item in  by_year_month.index]
-        month_col = [item[1] for item in  by_year_month.index]
-        dd={"Year": year_col,"Month": month_col,"Sales":by_year_month.values}
-        new=pd.DataFrame(dd) 
-        new.replace(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], list(range(1,13)), inplace=True)
-        f, ax = plt.subplots(figsize=(24, 8))
-        sns.set_theme()
-        flights_matrix = new.pivot_table(index="Month", columns="Year", values="Sales")
-        sns.heatmap(flights_matrix, annot=True, fmt="0.0f", linewidths=.2, ax=ax)
         average_sales = recession_data.groupby('Vehicle_Type')['Automobile_Sales'].mean().reset_index()
         R_chart2  = dcc.Graph(
-            figure=f)
+            figure=px.bar( average_sales,
+            x='Vehicle_Type',
+            y='Automobile_Sales',
+            color='Vehicle_Type',
+            title="Average Automobile Sales by vehicle Type over All Recession Periods"))
+        
 # Plot 3 Pie chart for total expenditure share by vehicle type during recessions
         # grouping data for plotting
 	# Hint:Use Vehicle_Type and Advertising_Expenditure columns
