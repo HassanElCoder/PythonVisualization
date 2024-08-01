@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 import seaborn as sns 
-
+import matplotlib.pyplot as plt
 
 # Load the data using pandas
 data = pd.read_csv('data/historical_automobile_sales.csv')
@@ -74,8 +74,53 @@ def update_output_container(report_type,input_year):
         # use groupby to create relevant data for plotting
         yearly_rec=recession_data.groupby('Year')['Automobile_Sales'].mean().reset_index()
         R_chart1 = dcc.Graph(
-            figure=px.line(yearly_rec, 
+               figure=px.line(yearly_rec, 
                 x='Year',
                 y='Automobile_Sales',
+                markers=True,
                 title="Average Automobile Sales fluctuation over Recession Period"))
-   
+#Plot 2 Calculate the average number of vehicles sold by vehicle type       
+        
+        # use groupby to create relevant data for plotting
+        #Hint:Use Vehicle_Type and Automobile_Sales columns
+        recession_sales= recession_data[["Year","Month","Automobile_Sales","Vehicle_Type"]]
+        by_year_month=recession_sales.groupby(['Year','Month'])['Automobile_Sales'].mean()
+        year_col =[item[0] for item in  by_year_month.index]
+        month_col = [item[1] for item in  by_year_month.index]
+        dd={"Year": year_col,"Month": month_col,"Sales":by_year_month.values}
+        new=pd.DataFrame(dd) 
+        new.replace(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], list(range(1,13)), inplace=True)
+        f, ax = plt.subplots(figsize=(24, 8))
+        sns.set_theme()
+        flights_matrix = new.pivot_table(index="Month", columns="Year", values="Sales")
+        sns.heatmap(flights_matrix, annot=True, fmt="0.0f", linewidths=.2, ax=ax)
+        average_sales = recession_data.groupby('Vehicle_Type')['Automobile_Sales'].mean().reset_index()
+        R_chart2  = dcc.Graph(
+            figure=f)
+# Plot 3 Pie chart for total expenditure share by vehicle type during recessions
+        # grouping data for plotting
+	# Hint:Use Vehicle_Type and Advertising_Expenditure columns
+        exp_rec= recession_data.groupby('Vehicle_Type')['Advertising_Expenditure'].sum()
+        R_chart3 = dcc.Graph(
+            figure=px.pie(exp_rec,values=exp_rec.values,names=list(exp_rec.index),
+            title="Total Advertising Expenditure by Vehicle type During Recessions"))
+
+# Plot 4 bar chart for the effect of unemployment rate on vehicle type and sales
+        #grouping data for plotting
+	# Hint:Use unemployment_rate,Vehicle_Type and Automobile_Sales columns
+        unemp_data= recession_data.groupby(['Vehicle_Type', 'unemployment_rate'])['Automobile_Sales'].mean().reset_index()
+        R_chart4 = dcc.Graph(figure=px.bar(unemp_data,x='unemployment_rate',y='Automobile_Sales',color='Vehicle_Type',
+        labels={'unemployment_rate': 'Unemployment Rate', 'Automobile_Sales': 'Average Automobile Sales'},
+        title='Effect of Unemployment Rate on Vehicle Type and Sales'))
+        return [
+             html.Div(className='chart-grid', children=[html.Div(children=R_chart1, style={'width': '50%','display': 'inline-block'}),html.Div(children=R_chart2,style={'width': '50%','display': 'inline-block'}),]),
+            html.Div(className='chart-grid', children=[html.Div(children=R_chart3,style={'width': '50%','display': 'inline-block'}),html.Div(children=R_chart4,style={'width': '50%','display': 'inline-block'})])
+            ]
+      
+
+
+        
+# Run the Dash app
+if __name__ == '__main__':
+    app.run_server(debug=True)
+
